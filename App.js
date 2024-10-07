@@ -7,6 +7,9 @@ import CalenderScreen from "./Screens/CalenderScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import SubmitScreen from "./Screens/SubmitScreen";
 
+//TODO:1.Home Screen
+//TODO:2Photo Upload Screen
+//TODO:3Image Details screen
 const Tab = createBottomTabNavigator();
 
 const App = () => {

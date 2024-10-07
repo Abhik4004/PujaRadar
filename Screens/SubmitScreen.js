@@ -12,14 +12,16 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
-import { Ionicons, FontAwesome } from "react-native-vector-icons"; // Import the icons
+import * as ImageManipulator from "expo-image-manipulator"; // Import the image manipulator
+import { Ionicons, FontAwesome } from "react-native-vector-icons";
 
 const SubmitScreen = () => {
-  const [name, setName] = useState("");
+  const [clubName, setClubName] = useState("");
   const [location, setLocation] = useState("");
-  const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
   const [base64Image, setBase64Image] = useState("");
+  const [submitterName, setSubmitterName] = useState("");
+  const [instagramAccount, setInstagramAccount] = useState("");
 
   const pickImage = async () => {
     const permissionResult =
@@ -38,38 +40,88 @@ const SubmitScreen = () => {
 
     if (!result.canceled) {
       const pickedImageUri = result.assets[0].uri;
+
+      // Set the selected image URI
       setImage(pickedImageUri);
-      const base64 = await FileSystem.readAsStringAsync(pickedImageUri, {
+
+      // Compress the image
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        pickedImageUri,
+        [{ resize: { width: 400, height: 400 } }], // Resize to width of 800px, maintain aspect ratio
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } // Compress to 70%
+      );
+
+      // Convert to base64
+      const base64 = await FileSystem.readAsStringAsync(manipulatedImage.uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
       setBase64Image(base64);
     }
   };
 
-  const handleSubmit = () => {
-    const email = "master@example.com"; // Replace with the master email address
-    const subject = "New Durga Puja Event Submission";
-    const body = `
-      Puja Name: ${name}
-      Location: ${location}
-      Description: ${description}
-      Image (Base64): ${base64Image}
-    `;
+  const handleSubmit = async () => {
+    // Validation
+    if (
+      !clubName ||
+      !location ||
+      !submitterName ||
+      !instagramAccount ||
+      !base64Image
+    ) {
+      Alert.alert("Error", "Please fill in all fields and select an image.");
+      return;
+    }
 
-    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
+    const eventData = {
+      clubName,
+      location,
+      submitterName,
+      instagramAccount,
+      image: base64Image,
+      createdAt: new Date().toISOString(),
+    };
 
-    Linking.openURL(mailtoLink).catch((err) => {
-      Alert.alert("Error", "Unable to open email client.");
-      console.error("Error opening email client: ", err);
-    });
+    const API_URL = "https://sheetdb.io/api/v1/8s4wnq6uu5yg7"; // Your SheetDB endpoint
 
-    setName("");
-    setLocation("");
-    setDescription("");
-    setImage(null);
-    setBase64Image("");
+    // Log the data being sent to the API
+    console.log("Submitting data:", JSON.stringify(eventData, null, 2)); // Pretty print the JSON data
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ data: eventData }), // Wrap your data in a "data" object
+      });
+
+      // Log response status
+      console.log("Response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error response from SheetDB:", errorText);
+        Alert.alert("Error", "Failed to submit your data. Please try again.");
+        return;
+      }
+
+      const responseData = await response.json();
+      // Log the response data
+      console.log("Response data:", responseData);
+
+      Alert.alert("Success", "Your submission has been recorded!");
+
+      // Clear form inputs
+      setClubName("");
+      setLocation("");
+      setImage(null);
+      setBase64Image("");
+      setSubmitterName("");
+      setInstagramAccount("");
+    } catch (error) {
+      console.error("Error submitting data to SheetDB:", error);
+      Alert.alert("Error", "There was a problem submitting your data.");
+    }
   };
 
   const openLink = (url) => {
@@ -84,9 +136,9 @@ const SubmitScreen = () => {
       <Text style={styles.title}>Submit Durga Puja Event</Text>
       <TextInput
         style={styles.input}
-        placeholder="Puja Name"
-        value={name}
-        onChangeText={setName}
+        placeholder="Club/Pandal Name"
+        value={clubName}
+        onChangeText={setClubName}
       />
       <TextInput
         style={styles.input}
@@ -95,12 +147,16 @@ const SubmitScreen = () => {
         onChangeText={setLocation}
       />
       <TextInput
-        style={styles.textArea}
-        placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        numberOfLines={4}
+        style={styles.input}
+        placeholder="Your Name"
+        value={submitterName}
+        onChangeText={setSubmitterName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Instagram Account"
+        value={instagramAccount}
+        onChangeText={setInstagramAccount}
       />
       <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
         <Text style={styles.imagePickerText}>
@@ -154,7 +210,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#FF5733", // Bright festive color
+    color: "#FF5733",
     marginBottom: 16,
     textAlign: "center",
     marginTop: 15,
@@ -164,20 +220,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 16,
     marginBottom: 8,
-    color: "#FFD700", // Golden text
+    color: "#FFD700",
     textAlign: "center",
   },
   input: {
     height: 40,
-    borderColor: "#FF5733", // Saffron color
-    borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // Slight transparency
-  },
-  textArea: {
-    height: 100,
     borderColor: "#FF5733",
     borderWidth: 1,
     marginBottom: 12,
@@ -186,7 +233,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.8)",
   },
   imagePicker: {
-    backgroundColor: "#DAA520", // Golden color for button
+    backgroundColor: "#DAA520",
     padding: 10,
     borderRadius: 5,
     alignItems: "center",
@@ -228,9 +275,9 @@ const styles = StyleSheet.create({
   },
   contactTextValue: {
     fontSize: 16,
-    color: "#1E90FF", // Blue color for links
-    textDecorationLine: "underline", // Underline for clickable links
-    marginLeft: 8, // Space between icon and text
+    color: "#1E90FF",
+    textDecorationLine: "underline",
+    marginLeft: 8,
   },
 });
 

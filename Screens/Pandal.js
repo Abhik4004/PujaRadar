@@ -3,13 +3,15 @@ import { View, Text, StyleSheet, Image, Linking } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
 
-function Pandal({ puja, navigation }) {
+function Pandal({ puja }) {
   const [like, setLike] = useState(false);
-  const [likeCount, setLikeCount] = useState(puja.likes);
+  const [likeCount, setLikeCount] = useState(puja.likes || 0); // Initialize likes count
 
   function openURI() {
-    const uri = puja.mapLocation;
-    Linking.openURL(uri).catch((err) => alert("Link could not be accessed"));
+    const uri = puja.instagramAccount; // Assuming you want to link to Instagram
+    Linking.openURL(`https://instagram.com/${uri}`).catch((err) =>
+      alert("Link could not be accessed")
+    );
   }
 
   return (
@@ -17,7 +19,9 @@ function Pandal({ puja, navigation }) {
       <View style={styles.imageContainer}>
         <Image
           source={{
-            uri: puja.image.startsWith("data:image/") ? puja.image : puja.image,
+            uri: puja.image
+              ? `data:image/jpeg;base64,${puja.image}` // Use base64 format for image
+              : "https://via.placeholder.com/150", // Placeholder image
           }}
           style={styles.image}
           resizeMode="cover"
@@ -25,7 +29,7 @@ function Pandal({ puja, navigation }) {
       </View>
 
       <View style={styles.infoContainer}>
-        <Text style={styles.name}>{puja.name}</Text>
+        <Text style={styles.name}>{puja.clubName}</Text>
         <View
           style={{ display: "flex", flexDirection: "row", marginBottom: 4 }}
         >
@@ -65,7 +69,7 @@ function Pandal({ puja, navigation }) {
             <Text style={styles.likesText}>Likes: {likeCount}</Text>
           </View>
           <Text style={styles.trendingText}>
-            Trending: #{puja.trendingPosition}
+            Submitter: {puja.submitterName}
           </Text>
         </View>
       </View>
@@ -75,37 +79,30 @@ function Pandal({ puja, navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFF3E0",
-    padding: 15,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#ddd",
     borderRadius: 10,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    overflow: "hidden",
   },
   imageContainer: {
-    marginBottom: 10, // Added margin to separate the image from the text
+    width: "100%",
+    height: 200,
   },
   image: {
-    width: "100%", // Changed to full width of the container
-    height: 180,
-    borderRadius: 8,
+    width: "100%",
+    height: "100%",
   },
   infoContainer: {
-    justifyContent: "center",
+    padding: 10,
   },
   name: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#5D4037",
-    marginBottom: 5,
   },
   location: {
-    fontSize: 14,
-    color: "#5D4037",
-    marginBottom: 10,
+    marginRight: 10,
+    fontSize: 16,
   },
   likeTrendingContainer: {
     flexDirection: "row",
@@ -118,13 +115,11 @@ const styles = StyleSheet.create({
   },
   likesText: {
     marginLeft: 5,
-    color: "#D32F2F",
-    fontSize: 14,
+    fontSize: 16,
   },
   trendingText: {
-    color: "#F57C00",
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: 16,
+    color: "#888",
   },
 });
 

@@ -5,45 +5,41 @@ import {
   SafeAreaView,
   StyleSheet,
   TouchableOpacity,
+  Image,
 } from "react-native";
 
+// About Durga Puja
 function HomeScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>🌼 Puja Radar 🌼</Text>
-      <Text style={styles.subtitle}>
-        {`🌺 Your guide to festive celebrations! 🌺`}
-      </Text>
-      <Text style={styles.description}>
-        📍 Discover the best pujas and events near you! 🎊
-      </Text>
-
-      <View style={styles.buttonRow}>
-        <TouchableOpacity
-          style={styles.pillButtonGreen}
-          onPress={() => navigation.navigate("Trending")}
-          accessibilityLabel="Trending Events Button"
-          activeOpacity={0.7}
-        >
-          <Text style={styles.buttonText}>Trending</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.pillButtonPurple}
-          onPress={() => navigation.navigate("Login")}
-          accessibilityLabel="Submit Event Button"
-          activeOpacity={0.7}
-        >
-          <Text style={styles.buttonText}>Submit</Text>
-        </TouchableOpacity>
+      <View style={styles.imageContainer}>
+        <View style={styles.ringOuter}>
+          <View style={styles.ringMiddle}>
+            <View style={styles.ringInner}>
+              <Image
+                source={require("../assets/CoverImage.jpg")}
+                style={styles.image}
+              />
+            </View>
+          </View>
+        </View>
       </View>
 
+      <Text style={styles.title}>Puja Radar</Text>
+      <Text style={styles.description}>
+        Durga Puja, a vibrant and spiritually rich festival, celebrates the
+        victory of good over evil. It is a time when communities come together
+        to worship Goddess Durga, enjoy cultural performances, and feast with
+        loved ones.
+      </Text>
+
       <TouchableOpacity
-        style={styles.pillButtonOrange}
-        onPress={() => navigation.navigate("Calender")}
-        accessibilityLabel="Calendar Button"
+        style={styles.pillButton}
+        onPress={() => navigation.navigate("Trending")}
+        accessibilityLabel="Trending"
         activeOpacity={0.7}
       >
-        <Text style={styles.buttonText}>Check Calendar</Text>
+        <Text style={styles.buttonText}>Trending</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -52,59 +48,61 @@ function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8E1F4", // Light background for festive feel
+    backgroundColor: "#FFF5E1", // Light cream background
     padding: 20,
     justifyContent: "center",
     alignItems: "center",
   },
+  imageContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  ringOuter: {
+    borderRadius: 100,
+    borderWidth: 4,
+    borderColor: "#FF7043", // Outer ring color
+    padding: 10,
+  },
+  ringMiddle: {
+    borderRadius: 90,
+    borderWidth: 4,
+    borderColor: "#FFA726", // Middle ring color
+    padding: 10,
+  },
+  ringInner: {
+    borderRadius: 80,
+    borderWidth: 4,
+    borderColor: "#FFCC80", // Inner ring color
+    padding: 10,
+  },
+  image: {
+    width: 120,
+    height: 120,
+    borderRadius: 60, // Makes the image circular
+  },
   title: {
     fontSize: 36,
     fontWeight: "bold",
-    color: "#C2185B", // Darker pink for the title
+    color: "#E78F81", // Darker pink for the title
     textAlign: "center",
     marginBottom: 10,
-    textShadowColor: "#E91E63",
+    textShadowColor: "#FFCFB3",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 5,
   },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: "500",
-    color: "#7B1FA2", // Purple for subtitle
-    textAlign: "center",
-    marginBottom: 10,
-  },
   description: {
-    fontSize: 16,
+    fontSize: 18,
     color: "#4A148C", // Dark purple for description
-    textAlign: "center",
-    paddingHorizontal: 10,
+    textAlign: "justify",
+    paddingHorizontal: 20,
     marginBottom: 30,
+    lineHeight: 24,
   },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "80%",
-    marginBottom: 20,
-  },
-  pillButtonGreen: {
-    backgroundColor: "#388E3C", // Green button for trending
+  pillButton: {
+    backgroundColor: "#FF7043", // Orange button
     borderRadius: 30,
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    marginRight: 10,
-  },
-  pillButtonPurple: {
-    backgroundColor: "#8E24AA", // Purple button for submit
-    borderRadius: 30,
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-  },
-  pillButtonOrange: {
-    backgroundColor: "#FFA726", // Orange button for calendar
-    borderRadius: 30,
-    paddingVertical: 10,
-    paddingHorizontal: 30,
+    paddingVertical: 12,
+    paddingHorizontal: 35,
     marginTop: 10,
   },
   buttonText: {
